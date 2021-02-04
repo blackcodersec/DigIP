@@ -8,5 +8,5 @@
 # Usage
 ./digip [domain-list-file] [output-file]
 
-
-![alt text](https://github.com/0xAkashsec/DigIP/blob/master/Screenshot_66.png)
+# Image
+![alt text](https://github.com/0xAkashsec/DigIP/blob/master/Image.png)
