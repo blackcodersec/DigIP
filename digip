@@ -8,7 +8,7 @@ echo " | (_| | | (_| | | | |_) |  ";
 echo "  \__,_|_|\__, | |_| .__/   ";
 echo "           __/ |   | |      ";
 echo "          |___/    |_|      ";
-echo "                   @0xakashsec";
+echo "                   @0xhunster";
 echo -e "\n"
 echo -e "[+] Total Domain list [$(cat $1|wc -l)]\n"
 if [ -z "$1" ] || [ -z "$2" ]; then
