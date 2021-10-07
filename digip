@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: ./digip.sh [domain-list-file] [output-file]
+# Usage: ./digip [domain-list] [output-file]
 echo "      _ _         _         ";
 echo "     | (_)       (_)        ";
 echo "   __| |_  __ _   _ _ __    ";
@@ -12,7 +12,7 @@ echo "                   @0xhunster";
 echo -e "\n"
 echo -e "[+] Total Domain list [$(cat $1|wc -l)]\n"
 if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "[!] Usage: ./digip.sh [domain-list-file] [output-file]"
+  echo "[!] Usage: ./digip [domain-list-file] [output-file]"
   exit 1
 fi
 echo "[+] Finding Domains to IPs..."
