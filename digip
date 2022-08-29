@@ -20,10 +20,7 @@ done="$GR[$RD✘$GR]$NC"
 plus="$GR[$RD+$GR]$NC"
 error="$GR[$RD!$GR]$NC"
 
-
 export PATH=$PATH:/root/bins/
-mainpath=/root
-toolspath=/root/colabhacks
 bar="---------------------------------------"
 
 echo -e "\n$bar\n\tSubdomains Enumerator\n$bar\n"
@@ -44,13 +41,13 @@ function automateOneForAll() {
 	python3 oneforall.py --target $domain run --path=/root/results/
 	cat /root/results/$domain.csv | cut -d "," -f6 | tee /root/results/$domain-oneforall.txt
 	rm -rf /root//results/*.csv
-	echo -e "$done$RD Subhunt$CY found$tir $GR[ $(cat /root/results/$domain-oneforall.txt | wc -l) ]$NC"
+	echo -e "$done$RD OneForAll$CY found$tir $GR[ $(cat /root/results/$domain-oneforall.txt | wc -l) ]$NC"
 }
 
 function automateSubfinder() {
 	echo -e "$CY[+] Now running$RD Subfinder$NC"
 	cd /root/colabhacks/
-	./subfinder -o /root/results/$domain-subfinder.txt -all -t 100 -silent -d $domain 
+	./subfinder -o /root/results/$domain-subfinder.txt -all -t 100 -silent -d $domain
 	echo -e "$done$RD Subfinder$CY found$tir $GR[ $(cat /root/results/$domain-subfinder.txt | wc -l) ]$NC"
 }
 
@@ -82,21 +79,51 @@ function automateSubhunt() {
 	echo -e "$done$RD Subhunt$CY found$tir $GR[ $(cat /root/results/$domain-subhunt.txt | wc -l) ]$NC"
 }
 
+# function resolveSubdomains() {
+# 	cd /root/results/
+# 	cat /root/colabhacks/subwordlist.txt | while read x;do echo "$x.$domain" >>/root/results/unresolved
+# 	puredns resolve /root/results/unresolved -l 1000 --rate-limit-trusted 500 -r /root/colabhacks/resolvers.txt -q -w /root/results/$domain-puredns.txt
+# 	#cat unresolved | /root/colabhacks/puredns -r /root/colabhacks/resolvers.txt --quiet -t A -o S -w /root/results/results-resolved.txt
+# 	rm -fr /root/results/unresolved
+# 	echo -e "$done$RD Puredns$CY found$tir $GR[ $(cat /root/results/results-resolved.txt | wc -l) ]$NC"
+# }
+
 function sortResults() {
 	cd /root/results/
-	cat *.txt | sort -u > results
-	#rm -fr *.txt
-	echo -e "$done$RD Total Subdomain$CY found$tir $GR[ $(cat /root/results/results | wc -l) ]$NC"
+	cat *.txt | sort -u >results
+	rm -fr *.txt
+
+	## second level domain finding
+	echo "$RD second level domain finding$NC"
+	cat results | grep -Eo '[^.]+[^.]+\.[^.]+\.[^.]+$' | sed 's/^[*]//g' | sed 's/^[.]//g' | sed 's/^[-]//g' | sed '/^$/d' | grep -Po "[\w-.]*$domain" | tee secondsubs.txt
+	cat secondsubs.txt | xargs -P50 -i{} sh -c '/root/colabhacks/assetfinder --subs-only {}' | sed '/^$/d' | tee secassetfinder.txt
+	cat secondsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/subfinder -d {} -t 100 -silent' | sed '/^$/d' | tee secsubfinder.txt
+	cat secondsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/findomain -t {} -q --http-retries 2' 2>/dev/null | sed '/^$/d' | tee secfindomain.txt
+
+	## second level domain finding
+	echo "$RD Third level domain finding$NC"
+	cat * | grep -Eo '[^.]+\.[^.]+\.[^.]+\.[^.]+$' | sed 's/^[*]//g' | sed 's/^[.]//g' | sed 's/^[-]//g' | sed '/^$/d' | grep -Po "[\w-.]*$domain" | tee thirdsubs.txt
+	cat thirdsubs.txt | xargs -P50 -i{} sh -c '/root/colabhacks/assetfinder --subs-only {}' | sed '/^$/d' | tee thiedassetfinder.txt
+	cat thirdsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/subfinder -d {} -t 100 -silent' | sed '/^$/d' | tee thirdsubfinder.txt
+	cat thirdsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/findomain -t {} -q --http-retries 2' 2>/dev/null | sed '/^$/d' | tee thirdfindomain.txt
+
+	## forth level domain finding
+	echo "$RD Forth level domain finding$NC"
+	cat * | grep -Eo '[^.]+\.[^.]+\.[^.]+\.[^.]+\.[^.]+$' | sed 's/^[*]//g' | sed 's/^[.]//g' | sed 's/^[-]//g' | sed '/^$/d' | grep -Po "[\w-.]*$domain" | tee forthsubs.txt
+	cat forthsubs.txt | xargs -P50 -i{} sh -c '/root/colabhacks/assetfinder --subs-only {}' | sed '/^$/d' | tee forthassetfinder.txt
+	cat forthsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/subfinder -d {} -t 100 -silent' | sed '/^$/d' | tee forthsubfinder.txt
+	cat forthsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/findomain -t {} -q --http-retries 2' 2>/dev/null | sed '/^$/d' | tee forthfindomain.txt
+
+	## fivth level domain finding
+	echo "$RD Forth level domain finding$NC"
+	cat * | grep -Eo '[^.]+\.[^.]+\.[^.]+\.[^.]+\.[^.]+\.[^.]+$' | sed 's/^[*]//g' | sed 's/^[.]//g' | sed 's/^[-]//g' | sed '/^$/d' | grep -Po "[\w-.]*$domain" | tee fivthsubs.txt
+	cat fivthsubs.txt | xargs -P50 -i{} sh -c '/root/colabhacks/assetfinder --subs-only {}' | sed '/^$/d' | tee fivthassetfinder.txt
+	cat fivthsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/subfinder -d {} -t 100 -silent' | sed '/^$/d' | tee fivthsubfinder.txt
+	cat fivthsubs.txt | xargs -P20 -i{} sh -c '/root/colabhacks/findomain -t {} -q --http-retries 2' 2>/dev/null | sed '/^$/d' | tee fivthfindomain.txt
+
+	cat * | sort -u >>$domain.txt
+	echo -e "$done$RD Total Subdomain$CY found$tir $GR[ $(cat $domain.txt | wc -l) ]$NC"
 }
-
-# function resolveSubdomains() {
-# 	cd /root/massdns/
-# 	cat /root/results/results.txt | /root/massdns/bin/massdns -r /root/massdns/lists/resolvers.txt --quiet -t A -o S -w /root/massdns/results-resolved.txt
-
-# 	echo -e "\n$bar\nResolved Results:\n$bar\n"
-# 	echo -e "[#] Resolved Count: $(wc -l < /root/massdns/results-resolved.txt)\n"
-# 	cat /root/massdns/results-resolved.txt
-# }
 
 automateSublist3r $domain
 automateOneForAll $domain
