@@ -29,83 +29,64 @@ bar="---------------------------------------"
 echo -e "\n$bar\n\tSubdomains Enumerator\n$bar\n"
 read -p "Please enter target (i.e. site.com): " host
 
-HOST=$domain
 domain=$host
-sublist3rPATH=/root/results/$domain-sublist3r.txt
-subfinderPATH=/root/results/$domain-subfinder.txt
-amassPATH=/root/results/$domain-amass.txt
-oneForAllPATH=/root/results/
-assetfinderPATH=/root/results/$domain-assetfinder.txt
-finddomainPATH=/root/results/$domain-findomain.txt
-
-# Maintaining social distancing between vars and funcs :)
-# UwU 
 
 function automateSublist3r() {
 	echo -e "$CY[+] Now running$RD Sublist3r$NC"
-	cd $mainpath
-	cd Sublist3r/
+	cd /root/Sublist3r/
 	python3 sublist3r.py -d $domain -n -t 10 | grep -Po "[\w-.]*$domain" | grep -v "Enumerating*" | sed 's/\[-\] //g' | tee /root/results/$domain-sublist3r.txt
 	echo -e "$done$RD Sublist3r$CY found$tir $GR[ $(cat /root/results/$domain-sublist3r.txt | wc -l) ]$NC"
-}
-
-function automateSubfinder() {
-	echo -e "$CY[+] Now running$RD Subfinder$NC"
-	cd $toolspath
-	subfinder -o /root/results/$domain-subfinder.txt -all -t 100 -silent -d $domain 
-	echo -e "$done$RD Subfinder$CY found$tir $GR[ $(cat /root/results/$domain-subfinder.txt | wc -l) ]$NC"
-}
-
-function automateAmass() {
-	echo -e "$CY[+] Now running$RD Amass$NC"
-	cd $toolspath
-	amass enum -passive -o /root/results/$domain-amass.txt -d $domain -nolocaldb -norecursive -timeout 8 -nocolor
-	echo -e "$done$RD Amass$CY found$tir $GR[ $(cat /root/results/$domain-amass.txt | wc -l) ]$NC"
-}
-
-function automateAssetsFinder() {
-	echo -e "$CY[+] Now running$RD Assetfinder$NC"
-	cd $toolspath
-	assetfinder --subs-only $domain | tee /root/results/$domain-assetfinder.txt
-	echo -e "$done$RD Assetfinder$CY found$tir $GR[ $(cat /root/results/$domain-assetfinder.txt | wc -l) ]$NC"
-}
-
-function automateFindomain() {
-	echo -e "$CY[+] Now running$RD Findomain$NC"
-	cd $toolspath
-	findomain -t $domain -u /root/results/$domain-findomain.txt -q
-	echo -e "$done$RD Findomain$CY found$tir $GR[ $(cat /root/results/$domain-findomain.txt | wc -l) ]$NC"
-}
-
-function automateSubhunt() {
-	echo -e "$CY[+] Now running$RD Subhunt$NC"
-	cd $toolspath
-	bash subhunt $domain | tee /root/results/$domain-subhunt.txt
-	echo -e "$done$RD Subhunt$CY found$tir $GR[ $(cat /root/results/$domain-subhunt.txt | wc -l) ]$NC"
 }
 
 function automateOneForAll() {
 	echo -e "$CY[+] Now running$RD OneForAll$NC"
 	cd /root/OneForAll/
-	#cd OneForAll/
-	python3 oneforall.py --target $HOST run --path=/root/results/
+	python3 oneforall.py --target $domain run --path=/root/results/
 	cat /root/results/$domain.csv | cut -d "," -f6 | tee /root/results/$domain-oneforall.txt
-	rm -rf $mainpath/results/*.csv
+	rm -rf /root//results/*.csv
 	echo -e "$done$RD Subhunt$CY found$tir $GR[ $(cat /root/results/$domain-oneforall.txt | wc -l) ]$NC"
 }
 
+function automateSubfinder() {
+	echo -e "$CY[+] Now running$RD Subfinder$NC"
+	cd /root/colabhacks/
+	./subfinder -o /root/results/$domain-subfinder.txt -all -t 100 -silent -d $domain 
+	echo -e "$done$RD Subfinder$CY found$tir $GR[ $(cat /root/results/$domain-subfinder.txt | wc -l) ]$NC"
+}
+
+function automateAmass() {
+	echo -e "$CY[+] Now running$RD Amass$NC"
+	cd /root/colabhacks/
+	./amass enum -passive -o /root/results/$domain-amass.txt -d $domain -nolocaldb -norecursive -timeout 8 -nocolor
+	echo -e "$done$RD Amass$CY found$tir $GR[ $(cat /root/results/$domain-amass.txt | wc -l) ]$NC"
+}
+
+function automateAssetsFinder() {
+	echo -e "$CY[+] Now running$RD Assetfinder$NC"
+	cd /root/colabhacks/
+	./assetfinder --subs-only $domain | tee /root/results/$domain-assetfinder.txt
+	echo -e "$done$RD Assetfinder$CY found$tir $GR[ $(cat /root/results/$domain-assetfinder.txt | wc -l) ]$NC"
+}
+
+function automateFindomain() {
+	echo -e "$CY[+] Now running$RD Findomain$NC"
+	cd /root/colabhacks/
+	./findomain -t $domain -u /root/results/$domain-findomain.txt -q
+	echo -e "$done$RD Findomain$CY found$tir $GR[ $(cat /root/results/$domain-findomain.txt | wc -l) ]$NC"
+}
+
+function automateSubhunt() {
+	echo -e "$CY[+] Now running$RD Subhunt$NC"
+	cd /root/colabhacks/
+	bash subhunt $domain | tee /root/results/$domain-subhunt.txt
+	echo -e "$done$RD Subhunt$CY found$tir $GR[ $(cat /root/results/$domain-subhunt.txt | wc -l) ]$NC"
+}
 
 function sortResults() {
 	cd /root/results/
 	cat *.txt | sort -u > results
-	rm -fr *.txt
+	#rm -fr *.txt
 	echo -e "$done$RD Total Subdomain$CY found$tir $GR[ $(cat /root/results/results | wc -l) ]$NC"
-
-
-	echo -e "\n$bar\nFinal Results:\n$bar\n"
-	echo -e "[#] Subdomains Count: $(wc -l < results.txt)\n"
-
-	cat results.txt
 }
 
 # function resolveSubdomains() {
@@ -118,9 +99,9 @@ function sortResults() {
 # }
 
 automateSublist3r $domain
+automateOneForAll $domain
 automateSubfinder $domain
 automateAmass $domain
-automateOneForAll $domain
 automateAssetsFinder $domain
 automateFindomain $domain
 automateSubhunt $domain
