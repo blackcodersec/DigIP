@@ -1,4 +1,5 @@
 #!/bin/bash
+# this script for digip
 
 BK=$(tput setaf 0)   # Black
 RD=$(tput setaf 1)   # Red
